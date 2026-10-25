@@ -13,18 +13,15 @@ const CREATED_STATUS = 201;
  * Flags the response as a creation and points the client at the new resource.
  */
 const setCreatedResponse = (ctx: Koa.Context, created: unknown) => {
-  if (!isObject(created)) {
-    return;
-  }
-
-  const { documentId } = created as { documentId?: string };
-
-  if (!documentId) {
-    return;
-  }
-
-  ctx.set('Location', `${ctx.request.path}/${documentId}`);
   ctx.status = CREATED_STATUS;
+
+  // The transformed response wraps the entry in `data`, which is where the id lives
+  const { data } = (isObject(created) ? created : {}) as { data?: unknown };
+  const { documentId } = (isObject(data) ? data : {}) as { documentId?: string };
+
+  if (documentId) {
+    ctx.set('Location', `${ctx.request.path}/${documentId}`);
+  }
 };
 
 /**
