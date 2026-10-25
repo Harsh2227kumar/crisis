@@ -10,12 +10,6 @@ interface RoleRowProps extends Pick<AdminRole, 'id' | 'name' | 'description' | '
   cursor?: string;
 }
 
-const getRowAction = (icons: RoleRowProps['icons']) => {
-  const safeActions = icons.length > 1 ? icons.slice(0, -1) : icons;
-
-  return safeActions.find((action) => typeof action.onClick === 'function');
-};
-
 const RoleRow = ({
   id,
   name,
@@ -27,7 +21,9 @@ const RoleRow = ({
   cursor,
 }: RoleRowProps) => {
   const { formatMessage } = useIntl();
-  const editObject = getRowAction(icons);
+  // The row opens the role for editing: the edit action is always the second icon,
+  // after the optional duplicate action and before the delete action.
+  const [, editObject] = icons;
 
   const usersCountText = formatMessage(
     {
@@ -43,7 +39,7 @@ const RoleRow = ({
       aria-rowindex={rowIndex}
       key={id}
       // @ts-expect-error – the prop uses `HTMLButtonElement` but we just specify `HTMLElement`
-      onClick={canUpdate ? editObject?.onClick : undefined}
+      onClick={canUpdate ? editObject.onClick : undefined}
     >
       <Td maxWidth={`13rem`}>
         <Typography ellipsis textColor="neutral800">
