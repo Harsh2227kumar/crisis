@@ -35,8 +35,6 @@ const MIME_BY_VALUE: Record<Exclude<TypeValue, 'folder' | 'document'>, string> =
 
 const ALL_MIMES = Object.values(MIME_BY_VALUE);
 
-const MILLISECONDS_PER_DAY = 24 * 60 * 60 * 1000;
-
 const PRESET_DELTAS: Record<DatePreset, { days?: number; months?: number; years?: number }> = {
   '1day': { days: 1 },
   '3days': { days: 3 },
@@ -112,26 +110,14 @@ const buildDateClause = (filter: DateFilter, now: Date): QueryClause => {
     }
   }
 
-  const fromDate = parseCalendarDate(filter.from);
-  const toDate = parseCalendarDate(filter.to);
+  const from = startOfDay(parseCalendarDate(filter.from)).toISOString();
+  const to = endOfDay(parseCalendarDate(filter.to)).toISOString();
 
   if (filter.condition === 'is') {
-    return {
-      [field]: {
-        $gte: startOfDay(fromDate).toISOString(),
-        $lte: endOfDay(toDate).toISOString(),
-      },
-    };
+    return { [field]: { $gte: from, $lte: to } };
   }
 
-  const spannedDays = Math.max(
-    0,
-    Math.round((toDate.getTime() - fromDate.getTime()) / MILLISECONDS_PER_DAY)
-  );
-  const before = startOfDay(fromDate).toISOString();
-  const after = endOfDay(new Date(fromDate.getTime() + spannedDays)).toISOString();
-
-  return { $or: [{ [field]: { $lt: before } }, { [field]: { $gt: after } }] };
+  return { $or: [{ [field]: { $lt: from } }, { [field]: { $gt: to } }] };
 };
 
 const buildMimeClause = (filter: TypeFilter): QueryClause | null => {
