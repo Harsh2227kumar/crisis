@@ -485,7 +485,7 @@ const likeAnchorOf = (operator: Operator): LikeAnchor => {
     return 'start';
   }
 
-  if (base.startsWith('ends') || base.startsWith('contain')) {
+  if (base.startsWith('ends')) {
     return 'end';
   }
 
