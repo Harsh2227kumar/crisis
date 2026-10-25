@@ -3,12 +3,7 @@ import { removeConditionKeyFromData } from './removeConditionKeyFromData';
 
 interface RecursiveRecordOfBooleans extends Record<string, boolean | RecursiveRecordOfBooleans> {}
 
-interface CheckboxState {
-  hasAllActionsSelected: boolean;
-  hasSomeActionsSelected: boolean;
-}
-
-const getCheckboxState = (dataObj: RecursiveRecordOfBooleans): CheckboxState => {
+const getCheckboxState = (dataObj: RecursiveRecordOfBooleans) => {
   const dataWithoutCondition = removeConditionKeyFromData(dataObj);
 
   const arrayOfValues = createArrayOfValues(dataWithoutCondition);
@@ -17,13 +12,10 @@ const getCheckboxState = (dataObj: RecursiveRecordOfBooleans): CheckboxState => 
     return { hasAllActionsSelected: false, hasSomeActionsSelected: false };
   }
 
-  return arrayOfValues.reduce<CheckboxState>(
-    (state, value) => ({
-      hasAllActionsSelected: state.hasAllActionsSelected && Boolean(value),
-      hasSomeActionsSelected: state.hasSomeActionsSelected || Boolean(value),
-    }),
-    { hasAllActionsSelected: true, hasSomeActionsSelected: false }
-  );
+  const hasAllActionsSelected = arrayOfValues.every(Boolean);
+  const hasSomeActionsSelected = arrayOfValues.some(Boolean) && !hasAllActionsSelected;
+
+  return { hasAllActionsSelected, hasSomeActionsSelected };
 };
 
 export { getCheckboxState };
