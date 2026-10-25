@@ -11,15 +11,14 @@ export function getPreviewUrlStatus(
     return undefined;
   }
 
-  const hasPublishedVersion = status === 'published' || status === 'modified';
-  const hasDraftVersion = status === 'draft' || status === 'modified';
-
-  if (hasPublishedVersion) {
-    return 'published';
+  // The draft wins for a modified document: its unpublished changes are what is
+  // being previewed, not the last published version.
+  if (status === 'draft' || status === 'modified') {
+    return 'draft';
   }
 
-  if (hasDraftVersion) {
-    return 'draft';
+  if (status === 'published') {
+    return 'published';
   }
 
   return undefined;
