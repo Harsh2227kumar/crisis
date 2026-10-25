@@ -12,7 +12,8 @@ const bytesToHumanReadable = (bytes: number) => {
   let unit = 0;
   let size = bytes;
 
-  while (size > 1 && unit < sizes.length - 1) {
+  // Move to the next unit only while the size still holds a whole one of it
+  while (size >= 1000 && unit < sizes.length - 1) {
     size /= 1000;
     unit += 1;
   }
