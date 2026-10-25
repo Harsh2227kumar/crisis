@@ -136,13 +136,7 @@ export const ProvidersPage = () => {
   const handleSubmit = async (values) => {
     trackUsage('willEditAuthenticationProvider');
 
-    const providersToSubmit = Object.keys(data).reduce((acc, name) => {
-      acc[name] = name === providerToEditName ? { ...values, ...data[name] } : data[name];
-
-      return acc;
-    }, {});
-
-    submitMutation.mutate({ providers: providersToSubmit });
+    submitMutation.mutate({ providers: { ...data, [providerToEditName]: values } });
   };
 
   if (isLoading) {
