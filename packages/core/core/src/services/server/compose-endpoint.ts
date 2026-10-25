@@ -127,35 +127,18 @@ const getController = (
   return ctrl;
 };
 
-const UID_SEPARATOR = '::';
-
 /**
  * Handlers arrive in two shapes: the short `controller.action` written by hand in a
  * route file, and the fully qualified `api::name.controller.action` that the core
- * routers generate.
+ * routers generate. In both cases the action is the last segment and everything
+ * before it is the controller name (or uid), which must be kept intact.
  */
 const extractHandlerParts = (name: string) => {
-  if (!name.includes(UID_SEPARATOR)) {
-    const separator = name.lastIndexOf('.');
-
-    return {
-      controllerName: name.slice(0, separator),
-      actionName: name.slice(separator + 1),
-    };
-  }
-
-  const [namespace, path] = name.split(UID_SEPARATOR);
-  const segments = path.split('.');
-  const actionName = segments.pop() ?? '';
-
-  // Single-model apis repeat the api name in the uid (`api::about.about`), so collapse
-  // the repetition back to a single segment before looking the controller up.
-  const repeated = segments.length > 1 && segments[0] === segments[1];
-  const controllerPath = repeated ? segments[0] : segments.join('.');
+  const separator = name.lastIndexOf('.');
 
   return {
-    controllerName: `${namespace}${UID_SEPARATOR}${controllerPath}`,
-    actionName,
+    controllerName: name.slice(0, separator),
+    actionName: name.slice(separator + 1),
   };
 };
 
