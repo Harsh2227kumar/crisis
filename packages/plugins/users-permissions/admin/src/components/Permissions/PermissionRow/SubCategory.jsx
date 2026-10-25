@@ -26,20 +26,16 @@ const SubCategory = ({ subCategory }) => {
     return get(modifiedData, subCategory.name, {});
   }, [modifiedData, subCategory]);
 
-  const selectionState = useMemo(() => {
-    const actions = Object.values(currentScopedModifiedData);
-    const enabledActions = actions.filter((action) => action.enabled === true);
-
-    return {
-      isEmpty: actions.length === 0,
-      hasEnabledActions: enabledActions.length > 0,
-      isFullySelected: enabledActions.length > 0 && actions.length >= enabledActions.length,
-    };
+  const hasAllActionsSelected = useMemo(() => {
+    return Object.values(currentScopedModifiedData).every((action) => action.enabled === true);
   }, [currentScopedModifiedData]);
 
-  const hasAllActionsSelected = !selectionState.isEmpty && selectionState.isFullySelected;
-
-  const hasSomeActionsSelected = selectionState.hasEnabledActions && !hasAllActionsSelected;
+  const hasSomeActionsSelected = useMemo(() => {
+    return (
+      Object.values(currentScopedModifiedData).some((action) => action.enabled === true) &&
+      !hasAllActionsSelected
+    );
+  }, [currentScopedModifiedData, hasAllActionsSelected]);
 
   const handleChangeSelectAll = useCallback(
     ({ target: { name } }) => {
