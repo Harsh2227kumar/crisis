@@ -170,12 +170,10 @@ const UnpublishAction: BulkActionComponent = ({ documents, model }) => {
     }
   };
 
-  const unpublishableDocuments = documents.filter(
-    ({ status }) => status === 'published' || status === 'modified'
-  );
-  const hasOnlyDrafts = unpublishableDocuments.length < documents.length;
-
-  const showUnpublishButton = hasDraftAndPublishEnabled && hasPublishPermission && !hasOnlyDrafts;
+  const showUnpublishButton =
+    hasDraftAndPublishEnabled &&
+    hasPublishPermission &&
+    documents.some((entry) => entry.status === 'published' || entry.status === 'modified');
 
   if (!showUnpublishButton) return null;
 
