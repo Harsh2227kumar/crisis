@@ -109,17 +109,11 @@ const FieldPicker = ({ headers = EMPTY_HEADERS, resetHeaders, setHeaders }: Fiel
      * create an array of the new headers, if the new name exists it should be removed,
      * otherwise it should be added
      */
-    const isDisplayed = headers.includes(name);
+    const newHeaders = headers.includes(name)
+      ? headers.filter((header) => header !== name)
+      : [...headers, name];
 
-    const newHeaders = headers.reduce<string[]>((acc, header) => {
-      if (header === name) {
-        return isDisplayed ? [...acc, header] : acc;
-      }
-
-      return isDisplayed ? acc : [...acc, header];
-    }, []);
-
-    setHeaders(isDisplayed ? newHeaders : [...newHeaders, name]);
+    setHeaders(newHeaders);
   };
 
   const handleReset = () => {
