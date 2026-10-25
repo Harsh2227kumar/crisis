@@ -77,16 +77,6 @@ type ColorPickerInputProps = InputProps & {
   labelAction?: React.ReactNode;
 };
 
-/**
- * The toggle both previews the current color and opens the picker, so it needs to know
- * whether there is a color to preview and whether the field can still be edited.
- */
-const getToggleState = (disabled?: boolean, value?: string | null) => {
-  const hasColor = value !== undefined && value !== null && value !== '';
-
-  return { hasColor, isToggleDisabled: Boolean(disabled) && !hasColor };
-};
-
 export const ColorPickerInput = React.forwardRef<HTMLButtonElement, ColorPickerInputProps>(
   ({ hint, disabled, labelAction, label, name, required, ...props }, forwardedRef) => {
     const [showColorPicker, setShowColorPicker] = React.useState(false);
@@ -99,7 +89,7 @@ export const ColorPickerInput = React.forwardRef<HTMLButtonElement, ColorPickerI
      *   if no value is currently set (as `null` really corresponds to no color, not
      *   black), so default to empty string if nothing else is available. */
     const color = field.value ?? props.placeholder ?? '';
-    const { hasColor, isToggleDisabled } = getToggleState(disabled, field.value);
+    const hasColor = field.value !== undefined && field.value !== null && field.value !== '';
 
     const composedRefs = useComposedRefs(forwardedRef, colorPickerButtonRef);
 
@@ -118,8 +108,8 @@ export const ColorPickerInput = React.forwardRef<HTMLButtonElement, ColorPickerI
                 aria-controls="color-picker-value"
                 aria-haspopup="dialog"
                 aria-expanded={showColorPicker}
-                aria-disabled={isToggleDisabled}
-                disabled={isToggleDisabled}
+                aria-disabled={disabled}
+                disabled={disabled}
                 variant="tertiary"
                 size="L"
               >
