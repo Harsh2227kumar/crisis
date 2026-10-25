@@ -12,11 +12,8 @@ const MILLISECONDS_DIGITS = 3;
 const parseMilliseconds = (fraction: string): string => {
   const digits = fraction.replace(/^\./, '').slice(0, MILLISECONDS_DIGITS);
 
-  if (digits.length === 0) {
-    return '0'.repeat(MILLISECONDS_DIGITS);
-  }
-
-  return String(Number.parseInt(digits, 10)).padStart(MILLISECONDS_DIGITS, '0');
+  // A fraction of a second is padded on the right: `.5` is 500 milliseconds
+  return digits.padEnd(MILLISECONDS_DIGITS, '0');
 };
 
 const parseTime = (value: unknown): string => {
