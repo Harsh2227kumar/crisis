@@ -63,27 +63,6 @@ const parseSortParam = (raw: string | undefined): ParsedSort => {
   return { sortBy: DEFAULT_SORT_BY, direction: null, isExplicit: false };
 };
 
-/** Columns the folders collection can be ordered by — it has no `size`. */
-const FOLDER_SORTABLE_FIELDS = ['name', 'createdAt', 'updatedAt'];
-const DEFAULT_FOLDERS_SORT = 'name:ASC';
-
-/** Keeps the rules the folders query understands, or falls back to alphabetical. */
-const toFoldersSort = (assetsSort: string, isExplicit: boolean): string => {
-  if (!isExplicit) {
-    return DEFAULT_FOLDERS_SORT;
-  }
-
-  const supportedRules = assetsSort
-    .split(',')
-    .filter((rule) => FOLDER_SORTABLE_FIELDS.includes(rule));
-
-  if (supportedRules.length === 0) {
-    return DEFAULT_FOLDERS_SORT;
-  }
-
-  return supportedRules.join(',');
-};
-
 const serializeSort = (sortBy: SortByKey | null, direction: SortDirectionKey | null): string => {
   const rules: (string | null)[] = [
     sortBy && SORT_BY_RULES[sortBy],
@@ -152,9 +131,14 @@ export const useListSort = (): ListSort => {
   };
 
   const assetsSort = serializeSort(sortBy, direction);
+  const folderRuleCandidates: (string | null)[] = [
+    sortBy && SORT_BY_RULES[sortBy],
+    direction && !direction.startsWith('size') ? SORT_DIRECTION_RULES[direction] : null,
+  ];
+  const folderRules = folderRuleCandidates.filter((rule): rule is string => Boolean(rule));
   // Default state keeps folders alphabetical (matches the sidebar tree) — only
   // an explicit user sort reorders the folders band.
-  const foldersSort = toFoldersSort(assetsSort, isExplicit);
+  const foldersSort = isExplicit && folderRules.length > 0 ? folderRules.join(',') : 'name:ASC';
 
   return {
     sortBy,
