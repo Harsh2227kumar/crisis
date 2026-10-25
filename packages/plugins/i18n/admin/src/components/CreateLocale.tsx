@@ -385,26 +385,20 @@ const EnumerationInput = ({
   const { data: defaultLocales = [] } = useGetDefaultLocalesQuery();
   const fieldValue = typeof value === 'string' ? value : undefined;
 
-  /**
-   * The display name we suggest for a locale comes from the list of locales Strapi knows
-   * about, which is also what the options are built from.
-   */
-  const suggestedNames = React.useMemo(() => {
+  const handleChange = (code: string) => {
+    onChange(name, code);
+
     if (!Array.isArray(defaultLocales)) {
-      return {};
+      return;
     }
 
-    return defaultLocales.reduce<Record<string, string>>((acc, locale) => {
-      acc[locale.name] = locale.code;
+    // The options are built from the list of default locales, so the code is one of them
+    const locale = defaultLocales.find((option) => option.code === code);
 
-      return acc;
-    }, {});
-  }, [defaultLocales]);
-
-  const handleChange = (value: string) => {
-    onChange(name, value);
-    // This lets us automatically fill the name field with the locale name
-    onChange('name', suggestedNames[value] ?? value);
+    if (locale) {
+      // This lets us automatically fill the name field with the locale name
+      onChange('name', locale.name);
+    }
   };
 
   // Find the label for the current value to display in the combobox
