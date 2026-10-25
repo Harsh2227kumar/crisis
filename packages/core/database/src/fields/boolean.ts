@@ -16,18 +16,12 @@ export default class BooleanField extends Field {
       return null;
     }
 
-    if (isStringOrNumber(value)) {
-      const normalized = `${value}`.trim().toLowerCase();
+    if (isStringOrNumber(value) && ['true', 't', '1', 1].includes(value)) {
+      return true;
+    }
 
-      // Query strings carry booleans in their compact spellings: `1`/`0` or a
-      // single letter.
-      if (normalized.length === 1) {
-        return ['t', '1'].includes(normalized);
-      }
-
-      if (normalized === 'true') {
-        return true;
-      }
+    if (isStringOrNumber(value) && ['false', 'f', '0', 0].includes(value)) {
+      return false;
     }
 
     return Boolean(value);
