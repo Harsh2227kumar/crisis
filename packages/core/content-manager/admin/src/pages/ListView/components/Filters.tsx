@@ -40,39 +40,6 @@ const NOT_ALLOWED_FILTERS = new Set([
 ]);
 const DEFAULT_ALLOWED_FILTERS = ['createdAt', 'updatedAt'];
 const USER_FILTER_ATTRIBUTES = new Set([...CREATOR_FIELDS, 'strapi_assignee']);
-/**
- * Operators whose operand is the admin user a filter selects. Those ids are resolved to display
- * names, so the matching users have to be fetched alongside the list.
- */
-const USER_SELECTION_OPERATORS = ['$eq', '$in'];
-
-const getSelectedUserIds = (
-  appliedFilters: NonNullable<NonNullable<Filters.Query['filters']>['$and']>,
-  isUserAttribute: (name: string) => boolean
-): string[] => {
-  const selected = new Set<string>();
-
-  appliedFilters.forEach((appliedFilter) => {
-    Object.entries(appliedFilter).forEach(([name, value]) => {
-      const operand = value.id;
-
-      if (!isUserAttribute(name) || typeof operand !== 'object') {
-        return;
-      }
-
-      Object.entries(operand)
-        .filter(([operator]) => USER_SELECTION_OPERATORS.includes(operator))
-        .forEach(([, id]) => {
-          if (id) {
-            selected.add(id);
-          }
-        });
-    });
-  });
-
-  return [...selected];
-};
-
 /* -------------------------------------------------------------------------------------------------
  * Filters
  * -----------------------------------------------------------------------------------------------*/
@@ -100,24 +67,25 @@ const Root = ({ disabled, schema, layout, children }: FiltersProps) => {
     [allPermissions]
   );
 
-  const isUserAttribute = React.useCallback(
-    (name: string) => {
-      // Check if the attribute is a relation to admin::user
-      const attribute = attributes[name];
-      const isAdminUserRelation =
-        attribute?.type === 'relation' &&
-        'target' in attribute &&
-        attribute.target === 'admin::user';
+  const selectedUserIds = (query?.filters?.$and ?? []).reduce<string[]>((acc, filter) => {
+    const [key, value] = Object.entries(filter)[0];
+    if (typeof value.id !== 'object') {
+      return acc;
+    }
 
-      return isAdminUserRelation || USER_FILTER_ATTRIBUTES.has(name);
-    },
-    [attributes]
-  );
+    const id = value.id.$eq || value.id.$ne;
 
-  const selectedUserIds = React.useMemo(
-    () => getSelectedUserIds(query?.filters?.$and ?? [], isUserAttribute),
-    [isUserAttribute, query?.filters?.$and]
-  );
+    // Check if the attribute is a relation to admin::user
+    const attribute = attributes[key];
+    const isAdminUserRelation =
+      attribute?.type === 'relation' && 'target' in attribute && attribute.target === 'admin::user';
+
+    if (id && (isAdminUserRelation || USER_FILTER_ATTRIBUTES.has(key)) && !acc.includes(id)) {
+      acc.push(id);
+    }
+
+    return acc;
+  }, []);
 
   const { data: userData } = useAdminUsers(
     { filters: { id: { $in: selectedUserIds } } },
