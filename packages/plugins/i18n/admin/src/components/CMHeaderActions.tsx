@@ -475,25 +475,6 @@ const AITranslationStatusAction = ({ documentId, model, collectionType }: Header
  * FillFromAnotherLocaleAction
  * -----------------------------------------------------------------------------------------------*/
 
-/**
- * "Fill in from another locale" copies the content of one locale into another one. The locale
- * being edited comes from the URL and the one it is filled from is picked in the dialog, and
- * neither of them is guaranteed to be set when the action renders.
- */
-const getFillLocales = (editedLocale?: string, pickedLocale?: string | null) => {
-  const resolvedLocales = [editedLocale, pickedLocale].filter((locale): locale is string =>
-    Boolean(locale)
-  );
-
-  if (resolvedLocales.length < 2) {
-    return null;
-  }
-
-  const [sourceLocale, targetLocale] = resolvedLocales;
-
-  return { sourceLocale, targetLocale };
-};
-
 const FillFromAnotherLocaleAction = ({
   documentId,
   meta,
@@ -522,9 +503,7 @@ const FillFromAnotherLocaleAction = ({
     : [];
 
   const fillFromLocale = (onClose: () => void) => async () => {
-    const fillLocales = getFillLocales(currentDesiredLocale, localeSelected);
-
-    if (!fillLocales) {
+    if (!localeSelected || !currentDesiredLocale) {
       return;
     }
 
@@ -532,7 +511,8 @@ const FillFromAnotherLocaleAction = ({
       const { data } = await getFillFromLocaleData({
         model,
         documentId,
-        ...fillLocales,
+        sourceLocale: localeSelected,
+        targetLocale: currentDesiredLocale,
         collectionType: collectionType as 'collection-types' | 'single-types',
       }).unwrap();
 
