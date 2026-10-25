@@ -124,16 +124,6 @@ const LeftMenu = ({ isFullPage = false }: { isFullPage?: boolean }) => {
     compareLinks,
   ]);
 
-  const linkCountsBySection = React.useMemo(
-    () =>
-      sections.reduce<Record<string, number>>((acc, section) => {
-        acc[section.id] = countTreeLinks(section.tree);
-
-        return acc;
-      }, {}),
-    [sections]
-  );
-
   const trimmedSearch = search.trim();
 
   const handleClear = () => {
@@ -304,7 +294,7 @@ const LeftMenu = ({ isFullPage = false }: { isFullPage?: boolean }) => {
                 }).sort((a, b) => compareLinks(a.link, b.link))
               : null;
 
-            const count = linkCountsBySection[section.id] ?? 0;
+            const count = matches ? matches.length : countTreeLinks(section.tree);
 
             const sectionItems = matches
               ? matches.map(({ link, path }) => (
