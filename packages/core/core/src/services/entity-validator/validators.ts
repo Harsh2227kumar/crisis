@@ -211,7 +211,7 @@ const addMaxFloatValidator = (
   }
 ) => {
   const max = toNumberSafe(attr.max);
-  return max !== undefined ? validator.max(max) : validator;
+  return max === undefined ? validator : validator.max(max);
 };
 
 /**
